@@ -1,9 +1,10 @@
 import { FaGoogle, FaGithub, FaLinkedin } from 'react-icons/fa';
-import {GoogleAuthProvider, getAuth, signInWithPopup} from 'firebase/auth';
+import {GithubAuthProvider, GoogleAuthProvider, getAuth, signInWithPopup, signInWithRedirect} from 'firebase/auth';
 import { app } from '../firebase';
 import { useDispatch } from 'react-redux';
 import { signInSuccess } from '../redux/user/userSlice';
 import { useNavigate } from 'react-router-dom';
+import { fetchSignInMethodsForEmail, linkWithCredential } from 'firebase/auth';
 
 export default function OAuth() {
     const dispatch = useDispatch();
@@ -33,8 +34,55 @@ export default function OAuth() {
     }
 
     const handleGithubClick = async () => {
-
+        const auth = getAuth(app);
+        try {
+            const provider = new GithubAuthProvider();
+            const auth = getAuth(app)
+            const result = await signInWithPopup(auth, provider);
+            
+            const res = await fetch('/api/auth/github',{
+                method:'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({name:result.user.displayName, email: result.user.email, photo: result.user.photoURL})
+            }) 
+            const data = await res.json()
+            dispatch(signInSuccess(data));
+            navigate('/');
+        } catch(error){
+            if (error.code === 'auth/account-exists-with-different-credential') {
+                const email = error.customData.email;
+                
+                const pendingCredential = GithubAuthProvider.credentialFromError(error); 
+                console.log(pendingCredential)
+                console.log(email)
+                const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+                console.log(signInMethods)
+                if (signInMethods.includes(GoogleAuthProvider.PROVIDER_ID)) {
+                    const googleProvider = new GoogleAuthProvider();
+                    console.log(googleProvider)
+                    const googleResult = await signInWithRedirect(auth, googleProvider);
+                    console.log("hello")
+                    console.log(googleResult)
+                    await linkWithCredential(googleResult.user, pendingCredential);
+                    const res = await fetch('/api/auth/github',{
+                        method:'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({name:googleResult.user.displayName, email: googleResult.user.email, photo: googleResult.user.photoURL})
+                    }) 
+                    const data = await res.json()
+                    dispatch(signInSuccess(data));
+                    navigate('/');
+                } else {
+                    console.log('Could not sign in with github', error);
+                }
+            
+        }
     }
+}
     const handleLinkedinClick = async () => {
         
     }
