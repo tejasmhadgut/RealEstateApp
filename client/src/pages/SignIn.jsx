@@ -44,7 +44,7 @@ export default function SignIn() {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-r via-gray-700 to-gray-800">
     <div className="w-full max-w-lg bg-gray-700 text-white rounded-lg shadow-lg p-6">
-    <h1 className='text-2xl font-extrabold text-center mb-6'>Sign In</h1>
+    <h1 className='text-3xl font-extrabold mb-6 text-center text-yellow-300'>Sign In</h1>
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input type='email' 
         placeholder="email" 
