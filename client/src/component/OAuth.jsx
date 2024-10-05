@@ -26,6 +26,7 @@ export default function OAuth() {
 
             })
             const data = await res.json()
+            console.log(data);
             dispatch(signInSuccess(data));
             navigate('/');
         } catch(error){
@@ -34,12 +35,14 @@ export default function OAuth() {
     }
 
     const handleGithubClick = async () => {
+        
         const auth = getAuth(app);
         try {
+
             const provider = new GithubAuthProvider();
             const auth = getAuth(app)
             const result = await signInWithPopup(auth, provider);
-            
+            console.log("hotay")
             const res = await fetch('/api/auth/github',{
                 method:'POST',
                 headers: {
@@ -53,18 +56,16 @@ export default function OAuth() {
         } catch(error){
             if (error.code === 'auth/account-exists-with-different-credential') {
                 const email = error.customData.email;
-                
+                console.log(email)
                 const pendingCredential = GithubAuthProvider.credentialFromError(error); 
                 console.log(pendingCredential)
-                console.log(email)
+            //    console.log(email)
                 const signInMethods = await fetchSignInMethodsForEmail(auth, email);
                 console.log(signInMethods)
                 if (signInMethods.includes(GoogleAuthProvider.PROVIDER_ID)) {
                     const googleProvider = new GoogleAuthProvider();
-                    console.log(googleProvider)
-                    const googleResult = await signInWithRedirect(auth, googleProvider);
-                    console.log("hello")
-                    console.log(googleResult)
+                    console.log(auth)
+                    const googleResult = await signInWithPopup(auth, googleProvider).catch(error => console.log(error));
                     await linkWithCredential(googleResult.user, pendingCredential);
                     const res = await fetch('/api/auth/github',{
                         method:'POST',
@@ -72,7 +73,7 @@ export default function OAuth() {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({name:googleResult.user.displayName, email: googleResult.user.email, photo: googleResult.user.photoURL})
-                    }) 
+                   }) 
                     const data = await res.json()
                     dispatch(signInSuccess(data));
                     navigate('/');
@@ -82,7 +83,7 @@ export default function OAuth() {
             
         }
     }
-}
+    }
     const handleLinkedinClick = async () => {
         
     }
