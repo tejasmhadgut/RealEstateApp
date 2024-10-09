@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux"
 import { useRef, useState, useEffect } from 'react'
 import {getDownloadURL, getStorage, ref, uploadBytesResumable} from 'firebase/storage'
-import { updateUserFailure, updateUserStart, updateUserSuccess } from "../redux/user/userSlice"
+import { deleteUserFailure, deleteUserStart, deleteUserSuccess, updateUserFailure, updateUserStart, updateUserSuccess } from "../redux/user/userSlice"
 import { useDispatch } from "react-redux"
 
 import { app } from "../firebase"
@@ -70,6 +70,23 @@ export default function Profile() {
             dispatch(updateUserFailure(error.message));
         }
     }
+    const handleDeleteUser = async (e) => {
+        try{
+            dispatch(deleteUserStart)
+            const res = await fetch(`/api/user/delete/${currentUser._id}`,{
+                method: 'DELETE',
+
+            });
+            const data = await res.json();
+            if(data.success == false){
+                dispatch(deleteUserFailure(data.message));
+                return
+            }
+            dispatch(deleteUserSuccess(data))
+        } catch(error){
+            dispatch(deleteUserFailure(error.message))
+        }
+    }
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-r via-gray-700 to-gray-800">
       <div className="w-full max-w-lg bg-gray-700 text-white rounded-lg shadow-lg p-6">
@@ -120,8 +137,8 @@ export default function Profile() {
           </button>
         </form>
         <div className="flex justify-between items-center mt-6">
-          <button className="text-red-400 hover:underline">Delete Account</button>
-          <button className="text-yellow-300 hover:underline">Sign Out</button>
+          <span onClick={handleDeleteUser} className="text-red-400 hover:underline">Delete Account</span>
+          <span className="text-yellow-300 hover:underline">Sign Out</span>
         </div>
         <p className="text-red-400 mt-5 text-center">{error?error:''}</p>
         <p className="text-green-400 mt-5 text-center">{updateSuccess? 'User is updated successfully': ''}</p>
