@@ -1,5 +1,5 @@
 import { FaGoogle, FaGithub, FaLinkedin } from 'react-icons/fa';
-import {GithubAuthProvider, GoogleAuthProvider, getAuth, signInWithPopup, signInWithRedirect} from 'firebase/auth';
+import {GithubAuthProvider, GoogleAuthProvider, getAuth, signInWithPopup, } from 'firebase/auth';
 import { app } from '../firebase';
 import { useDispatch } from 'react-redux';
 import { signInSuccess } from '../redux/user/userSlice';
